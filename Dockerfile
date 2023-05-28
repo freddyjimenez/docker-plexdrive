@@ -25,7 +25,7 @@ ARG DEBIAN_FRONTEND="noninteractive"
 WORKDIR /tmp/plexdrive
 RUN git clone https://github.com/meisyn/plexdrive.git .
 RUN GO111MODULE=on go install
-RUN GO111MODULE=go build
+RUN go build
 # 
 # COLLECT
 # 
