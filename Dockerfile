@@ -1,7 +1,7 @@
 ARG UBUNTU_VER=20.04
 FROM golang:1.16.4-stretch AS build
 FROM ghcr.io/by275/base:ubuntu AS prebuilt
-FROM ghcr.io/by275/base:ubuntu${UBUNTU_VER} AS base
+FROM plexinc/pms-docker AS base
 
 # 
 # BUILD
