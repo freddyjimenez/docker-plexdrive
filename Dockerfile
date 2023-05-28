@@ -1,5 +1,5 @@
 ARG UBUNTU_VER=20.04
-
+FROM golang:1.16.4-stretch AS build
 FROM ghcr.io/by275/base:ubuntu AS prebuilt
 FROM ghcr.io/by275/base:ubuntu${UBUNTU_VER} AS base
 
@@ -7,16 +7,24 @@ FROM ghcr.io/by275/base:ubuntu${UBUNTU_VER} AS base
 # BUILD
 # 
 FROM base AS plexdrive
-
+FROM build AS buildplexdrive
 ARG TARGETARCH
-ARG PLEXDRIVE_VER="5.2.1"
 ARG DEBIAN_FRONTEND="noninteractive"
 
-RUN \
-    echo "**** add plexdrive ****" && \
-    PLEXDRIVE_ARCH=$(if [ "$TARGETARCH" = "arm" ]; then echo "arm7"; else echo "$TARGETARCH"; fi) && \
-    curl -o /tmp/plexdrive -LJ https://github.com/plexdrive/plexdrive/releases/download/${PLEXDRIVE_VER}/plexdrive-linux-${PLEXDRIVE_ARCH}
+# RUN apt-get update && \
+#     apt-get install -yqq --no-install-recommends \
+#     fuse git wget
+# RUN wget https://golang.org/dl/go1.16.4.linux-amd64.tar.gz
+# RUN tar -xvf go1.16.4.linux-amd64.tar.gz -C /usr/local
+# RUN export GOPATH=$HOME/go
+# RUN export PATH=/usr/local/go/bin:$PATH:$GOPATH/bin
+# RUN cd /usr/local/go/bin/
+# RUN dir
+# RUN ./go version
 
+WORKDIR /tmp/plexdrive
+RUN git clone https://github.com/meisyn/plexdrive.git .
+RUN GO111MODULE=on go install
 # 
 # COLLECT
 # 
@@ -29,7 +37,7 @@ ADD https://raw.githubusercontent.com/by275/docker-base/main/_/etc/cont-init.d/i
 ADD https://raw.githubusercontent.com/by275/docker-base/main/_/etc/cont-init.d/wait-for-mnt /bar/etc/cont-init.d/30-wait-for-mnt
 
 # add plexdrive
-COPY --from=plexdrive /tmp/plexdrive /bar/usr/local/bin/
+COPY --from=buildplexdrive /tmp/plexdrive /bar/usr/local/bin/
 
 # add local files
 COPY root/ /bar/
